@@ -152,6 +152,7 @@ abline(v = simulation_result$treatments, col = "green", lty = 2)  # Treatments i
 ```{r}
 #| label: packages
 #| message: false
+#| echo: false
 library(ggdag)
 library(ggplot2)
 
@@ -177,3 +178,24 @@ dag %>%
 ```
 
 See <https://cran.r-project.org/web/packages/simDAG/vignettes/v_sim_from_dag.html> for more information.
+
+## Revised simulation with treatments
+
+-	Can we overlay treatments and show
+-	Binary indicator of on treatment or not
+-	Precondition for treatment: should be in medium or high pain state (not low)
+-	If in high state, go onto treatment
+    -	After 3 or 6 months, side-effects or non-effect of teatment
+    -	Once formally non-responded, switch to another treatment
+    -	Reset clock and roll the dice on treatment effectiveness + side effects (two separate things but both would cause change after 3-6 months)
+    -	Do people every come off treatment? If it works well, then no, not for the purpose of this exercise. So people in medium or high state have a high probability of being treated, and if it works, then high probability of going down to medium or low. And if so, then assuming no side effects, then just stay on it.
+    -	Make treatment keep pain down for 1 month (not just instantaneous effect). Realistically 3-6 months but might not get captured in 6 month followup period. No need to assume anything like gradual treatment resistance. It either works or it doesn’t.
+    -	Speed of response – wash in time. Some people respond rapidly, slowly or not at all. Do you respond in 2 weeks or in 3 months?
+
+In clinical reality, when we have a new patient, we really can’t predict what their trajectory will be, even if we know their age, sex or ethnicity. So just assume phenotype, set at baseline, but not observable or not directly correlated with observable baseline variables.
+
+No need to connect genotype with treatment. Treatment effectiveness can just be a roll of the dice.
+
+See `simulator.R`.
+
+![Trajectories](trajectories.png)
