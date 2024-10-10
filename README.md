@@ -1,6 +1,3 @@
-
-# Health Research from Home (HRfH)
-
 Synthetic data for hackathon.
 
 ## Parameters
