@@ -24,7 +24,7 @@
 #' @param alpha Scaling factor for ordered logit model. Not used.
 #' @param cutpoints Latent thresholds for the ordinal model.
 #' @param verbose Print diagnostic messages, useful for debugging. Default \code{FALSE}.
-latent_process <- function(num_timepoints = 180,
+simulate_patient <- function(num_timepoints = 180,
                            baseline_variation = 0.5,
                            flare_rate = 0.01,
                            flare_magnitude = 2,
@@ -51,11 +51,9 @@ latent_process <- function(num_timepoints = 180,
     }
 
     # Latent state
-    #dx[1] <- dx[1] + cutpoints[1]
     dx[1] <- rnorm(1)
     x <- cumsum(dx)
 
-    # browser()
     # Treatment
     if (length(cutpoints) < 10)
       warning('Code optimized for 10 cutpoints')
@@ -108,53 +106,16 @@ latent_process <- function(num_timepoints = 180,
                treat = seq_along(x) %in% treat_times)
 }
 
-# df <- latent_process(100, verbose = TRUE)
-
-library(ggplot2)
-# # Plot latent state over time
-# ggplot(df, aes(x = time, y = latent)) +
-#     geom_line() +
-#     geom_point() +
-#     geom_hline(yintercept = seq(-2, 3, length = 10), linetype = "dashed") +
-#     # Treatment
-#     geom_vline(aes(xintercept = time), data = subset(df, treat), colour = 'seagreen') +
-#     # Flares
-#     geom_vline(aes(xintercept = time), data = subset(df, flare), colour = 'tomato2') +
-#     labs(title = "Latent State Over Time", x = "Time", y = "Latent State")
-
-# # Plot pain level over time
-# ggplot(df, aes(x = time, y = pain)) +
-#     geom_line() +
-#     geom_point() +
-#     # Treatment
-#     geom_vline(aes(xintercept = time), data = subset(df, treat), colour = 'seagreen') +
-#     # Flares
-#     geom_vline(aes(xintercept = time), data = subset(df, flare), colour = 'tomato2') +
-#     labs(title = "Pain Level Over Time", x = "Time", y = "Pain Level") +
-#     ylim(0, 10)
-
-set.seed(2)
-cutpoints <- seq(-2, 3, length = 10)
-patients_data <- purrr::map_dfr(1:10, function(id) {
-    patient <- latent_process(verbose = FALSE,
-                              flare_rate = 0.01,
-                              baseline_variation = 0.1,
-                              cutpoints = cutpoints)
-    patient$id <- id
-    patient
-})
-
-# Plot pain level over time
-ggplot(patients_data, aes(x = time, y = pain)) +
-    # Flares
-    geom_vline(aes(xintercept = time), data = subset(patients_data, flare),
-               colour = 'tomato2') +
-    # Treatment
-    geom_vline(aes(xintercept = time), data = subset(patients_data, treat),
-               colour = 'seagreen', linetype = 'dashed') +
+#' Plot latent trajectory of a patient with flares and treatment
+#' @import ggplot2
+plot_trajectory <- function(dataset) {
+  ggplot(dataset) +
+    aes(x = time, y = pain, xintercept = time) +
+    geom_vline(data = subset(dataset, flare), colour = 'tomato2') +
+    geom_vline(data = subset(dataset, treat), colour = 'seagreen', linetype = 'dashed') +
     geom_line() +
     geom_point() +
-    labs(title = "Pain Level Over Time", x = "Time", y = "Pain Level") +
+    labs(title = 'Pain Level Over Time', x = 'Time', y = 'Pain Level') +
     scale_y_continuous(breaks = seq(0, 10, by = 2)) +
     facet_wrap(~ id, ncol = 2)
-ggsave('trajectories.png', width = 16, height = 8)
+}
