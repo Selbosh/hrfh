@@ -30,6 +30,7 @@ simulate_patient <- function(num_timepoints = 180,
                            flare_magnitude = 2,
                            flare_variation = 0.25,
                            treat_magnitude = 1/10,
+                           treat_duration = 30,
                            alpha = 1,
                            cutpoints = seq(-2, 3, length = 10),
                            verbose = FALSE) {
@@ -64,14 +65,14 @@ simulate_patient <- function(num_timepoints = 180,
     if (!is.na(first_high)) {
         if (verbose)
             message('First high: ', first_high, ': ', x[first_high])
-        treat_times <- seq(which.max(x >= high_states[1]), num_timepoints, by = 31)
+        treat_times <- seq(which.max(x >= high_states[1]), num_timepoints, by = treat_duration + 1)
         treat_times <- setdiff(treat_times, flare_times) # Flares nullify treatment
             for (treat_time in treat_times) {
                 x <- cumsum(dx)
                 if (runif(1) < 0.5 &&                    # Flip a coin for effectiveness
                         x[treat_time] >= cutpoints[1]) { # Don't treat healthy people.
                     if (verbose) message('Treatment at time ', treat_time, ' effective')
-                    treat_end <- pmin(treat_time + 30, num_timepoints)
+                    treat_end <- pmin(treat_time + treat_duration, num_timepoints)
                     treat_ids <- seq(treat_time, treat_end)
                     dx[treat_ids] <- dx[treat_ids] - pmax(rnorm(1, mean = treat_magnitude, sd = 0.01), 0) /
                         abs(ifelse(x[treat_ids] < 0, x[treat_ids], 1)) # decrease effect if already healthy

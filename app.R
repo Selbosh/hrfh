@@ -11,14 +11,14 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       sliderInput('num_timepoints', 'Number of Timepoints', min = 50, max = 365, value = 180),
-      numericInput('baseline_variation', 'Baseline Variation', value = 0.5),
+      numericInput('baseline_variation', 'Baseline Variation', value = 0.2),
       fluidRow(
         column(4, numericInput('flare_rate', 'Rate', value = 0.01)),
         column(4, numericInput('flare_magnitude', 'Magnitude', value = 2)),
         column(4, numericInput('flare_variation', 'Variation', value = 0.25))
       ),
-      numericInput('treat_magnitude', 'Treatment Magnitude', value = 1),
-      numericInput('alpha', 'Alpha', value = 1),
+      numericInput('treat_magnitude', 'Treatment Magnitude', value = 0.1),
+      sliderInput('treat_duration', 'Treatment Duration', min = 1, max = 90, value = 30),
       textInput('cutpoints', 'Cutpoints (comma-separated)', value = paste((-5:4)/2, collapse = ',')),
       fluidRow(
         column(6, actionButton('randomizeSeed', 'Randomize seed')),
@@ -51,6 +51,7 @@ server <- function(input, output, session) {
       flare_magnitude = input$flare_magnitude,
       flare_variation = input$flare_variation,
       treat_magnitude = input$treat_magnitude,
+      treat_duration = input$treat_duration,
       alpha = input$alpha,
       cutpoints = cutpoints,
       verbose = TRUE
