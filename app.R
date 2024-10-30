@@ -1,6 +1,6 @@
 library(shiny)
 library(ggplot2)
-library(purrr)
+library(patchwork)
 
 # Define latent_process() function:
 source('simulator.R')
@@ -36,14 +36,14 @@ ui <- fluidPage(
 # Define server logic
 server <- function(input, output, session) {
   observeEvent(input$randomizeSeed, {
-      updateNumericInput(session, 'seed', value = sample(1:9999, 1))
+    updateNumericInput(session, 'seed', value = sample(1:9999, 1))
   })
 
   output$trajectoryPlot <- renderPlot({
     cutpoints <- as.numeric(unlist(strsplit(input$cutpoints, ',')))
 
     set.seed(input$seed)
-    
+
     patient <- simulate_patient(
       num_timepoints = input$num_timepoints,
       baseline_variation = input$baseline_variation,
@@ -55,15 +55,27 @@ server <- function(input, output, session) {
       cutpoints = cutpoints,
       verbose = TRUE
     )
-    
-    ggplot(patient) +
+
+    trajectory_plot <- ggplot(patient) +
       aes(x = time, y = pain) +
       geom_vline(aes(xintercept = time), data = subset(patient, treat), colour = 'steelblue') +
       geom_vline(aes(xintercept = time), data = subset(patient, flare), colour = 'tomato2') +
       geom_line() +
       geom_point() +
-      labs(x = 'Day of follow-up', y = 'Pain Level') +
+      labs(x = NULL, y = 'Pain Level') +
       scale_y_continuous(breaks = seq(0, 10, by = 2), limits = c(0, 10))
+
+    latent_plot <- ggplot(patient) +
+      aes(x = time, y = latent) +
+      geom_vline(aes(xintercept = time), data = subset(patient, treat), colour = 'steelblue') +
+      geom_vline(aes(xintercept = time), data = subset(patient, flare), colour = 'tomato2') +
+      geom_line() +
+      geom_point() +
+      labs(x = 'Day of follow-up', y = 'Latent disease') +
+      scale_y_continuous(breaks = cutpoints, minor_breaks = NULL)
+
+
+    trajectory_plot + latent_plot + plot_layout(ncol = 1)
   })
 }
 
