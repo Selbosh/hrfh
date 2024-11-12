@@ -1,8 +1,9 @@
 ---
-format: gfm
+title: HRfH hackathon
+output: github_document
 ---
 
-# HRfH hackathon
+<!-- Generated from README.Rmd. Please edit that document. -->
 
 Synthetic data for hackathon.
 
